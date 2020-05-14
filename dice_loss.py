@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Function
 
 
-class DiceCoeff(Function):
+class IoU(Function):
     """Dice coeff for individual examples"""
 
     def forward(self, input, target):
@@ -29,7 +29,7 @@ class DiceCoeff(Function):
         return grad_input, grad_target
 
 
-def dice_coeff(input, target):
+def iou_coeff(input, target):
     """Dice coeff for batches"""
     if input.is_cuda:
         s = torch.FloatTensor(1).cuda().zero_()
@@ -37,6 +37,6 @@ def dice_coeff(input, target):
         s = torch.FloatTensor(1).zero_()
 
     for i, c in enumerate(zip(input, target)):
-        s = s + DiceCoeff().forward(c[0], c[1])
+        s = s + IoU().forward(c[0], c[1])
 
     return s / (i + 1)

@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from dice_loss import dice_coeff
+from dice_loss import iou_coeff
 
 
 def eval_net(net, loader, device):
@@ -21,12 +21,9 @@ def eval_net(net, loader, device):
             with torch.no_grad():
                 mask_pred = net(imgs)
 
-            if net.n_classes > 1:
-                tot += F.cross_entropy(mask_pred, true_masks).item()
-            else:
-                pred = torch.sigmoid(mask_pred)
-                pred = (pred > 0.5).float()
-                tot += dice_coeff(pred, true_masks).item()
+            pred = torch.sigmoid(mask_pred)
+            pred = (pred > 0.5).float()
+            tot += iou_coeff(pred, true_masks.type_as(pred)).item()
             pbar.update()
 
     return tot / n_val

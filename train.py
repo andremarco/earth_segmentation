@@ -55,10 +55,7 @@ def train_net(dir_img,
 
     optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min' if net.n_classes > 1 else 'max', patience=2)
-    if net.n_classes > 1:
-        criterion = nn.CrossEntropyLoss()
-    else:
-        criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.BCEWithLogitsLoss()
 
     early_stopping = 10
     epochs_no_best = 0
@@ -81,7 +78,7 @@ def train_net(dir_img,
                 true_masks = true_masks.to(device=device, dtype=mask_type)
 
                 masks_pred = net(imgs)
-                loss = criterion(masks_pred, true_masks)
+                loss = criterion(masks_pred, true_masks.type_as(masks_pred))
                 epoch_loss += loss.item()
 
                 pbar.set_postfix(**{'loss (batch)': loss.item()})
@@ -170,7 +167,7 @@ def get_args():
                         help='Learning rate', dest='lr')
     parser.add_argument('-f', '--load', dest='load', type=str, default=False,
                         help='Load model from a .pth file')
-    parser.add_argument('-s', '--scale', dest='scale', type=float, default=1,
+    parser.add_argument('-s', '--scale', dest='scale', type=float, default=0.5,
                         help='Downscaling factor of the images')
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
                         help='Percent of the data that is used as validation (0-100)')
