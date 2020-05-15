@@ -116,14 +116,12 @@ def train_net(dir_img,
                 logging.info('Created checkpoint directory')
             except OSError:
                 pass
-            #torch.save(net.state_dict(),
-            #           dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
-            #logging.info(f'Checkpoint {epoch + 1} saved !')
+            torch.save(net.state_dict(), dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
+            logging.info(f'Checkpoint {epoch + 1} saved !')
             if val_iou > best_val_iou:
                 best_val_iou = val_iou
                 best_epoch = epoch
-                torch.save(net.state_dict(),
-                           dir_checkpoint + 'model.pth')
+                torch.save(net.state_dict(), dir_checkpoint + 'model.pth')
                 logging.info('Best model saved !')
 
         if val_iou > best_val_iou:
