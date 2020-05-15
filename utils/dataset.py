@@ -5,7 +5,7 @@ from glob import glob
 import torch
 from torch.utils.data import Dataset
 import logging
-from tifffile import imread
+from PIL import Image
 
 class BasicDataset(Dataset):
     def __init__(self, imgs_dir, masks_dir, scale=1):
@@ -23,10 +23,12 @@ class BasicDataset(Dataset):
 
     @classmethod
     def preprocess(cls, pil_img, scale):
-        w, h = pil_img.shape[:2]
+        w, h = pil_img.size
         newW, newH = int(scale * w), int(scale * h)
         assert newW > 0 and newH > 0, 'Scale is too small'
-        img_nd = np.resize(pil_img, (newW, newH, pil_img.shape[2]))
+        pil_img = pil_img.resize((newW, newH))
+
+        img_nd = np.array(pil_img)
 
         if len(img_nd.shape) == 2:
             img_nd = np.expand_dims(img_nd, axis=2)
@@ -47,10 +49,10 @@ class BasicDataset(Dataset):
             f'Either no mask or multiple masks found for the ID {idx}: {mask_file}'
         assert len(img_file) == 1, \
             f'Either no image or multiple images found for the ID {idx}: {img_file}'
-        mask = imread(mask_file[0])
-        img = imread(img_file[0])
+        mask = Image.open(mask_file[0])
+        img = Image.open(img_file[0])
 
-        assert img.shape[:2] == mask.shape[:2], \
+        assert img.size == mask.size, \
             f'Image and mask {idx} should be the same size, but are {img.size} and {mask.size}'
 
         img = self.preprocess(img, self.scale)

@@ -55,11 +55,12 @@ def train_net(dir_img,
 
     optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min' if net.n_classes > 1 else 'max', patience=2)
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
 
+    # Training
     early_stopping = 10
     epochs_no_best = 0
-    best_val_dice = 0
+    best_val_iou = 0
     for epoch in range(epochs):
         net.train()
 
@@ -78,7 +79,7 @@ def train_net(dir_img,
                 true_masks = true_masks.to(device=device, dtype=mask_type)
 
                 masks_pred = net(imgs)
-                loss = criterion(masks_pred, true_masks.type_as(masks_pred))
+                loss = criterion(masks_pred, true_masks.squeeze(1))
                 epoch_loss += loss.item()
 
                 pbar.set_postfix(**{'loss (batch)': loss.item()})
@@ -97,21 +98,17 @@ def train_net(dir_img,
                 writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), epoch)
                 writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(), epoch)
 
-        val_score = eval_net(net, val_loader, device)
-        scheduler.step(val_score)
+        # Validation
+        val_ce, val_iou = eval_net(net, val_loader, device)
+        scheduler.step(val_ce)
         writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], epoch)
 
-        if net.n_classes > 1:
-            logging.info('Validation cross entropy: {}'.format(val_score))
-            writer.add_scalar('Loss/test', val_score, epoch)
-        else:
-            logging.info('Validation Dice Coeff: {}'.format(val_score))
-            writer.add_scalar('Dice/test', val_score, epoch)
+        logging.info('Validation cross entropy: {}'.format(val_ce))
+        logging.info('Validation IoU: {}'.format(val_iou))
+        writer.add_scalar('Loss/test', val_ce, epoch)
+        writer.add_scalar('IoU/test', val_iou, epoch)
 
         writer.add_images('images', imgs, epoch)
-        if net.n_classes == 1:
-            writer.add_images('masks/true', true_masks, epoch)
-            writer.add_images('masks/pred', torch.sigmoid(masks_pred) > 0.5, epoch)
 
         if save_cp:
             try:
@@ -122,14 +119,14 @@ def train_net(dir_img,
             #torch.save(net.state_dict(),
             #           dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
             #logging.info(f'Checkpoint {epoch + 1} saved !')
-            if val_score > best_val_dice:
-                best_val_dice = val_score
+            if val_iou > best_val_iou:
+                best_val_iou = val_iou
                 best_epoch = epoch
                 torch.save(net.state_dict(),
                            dir_checkpoint + 'model.pth')
                 logging.info('Best model saved !')
 
-        if val_score > best_val_dice:
+        if val_iou > best_val_iou:
             epochs_no_best = 0
         else:
             epochs_no_best += 1
@@ -137,17 +134,15 @@ def train_net(dir_img,
                 logging.info('Stopped for Early Stopping')
                 break
 
-    logging.info('Best Validation Dice Coeff: {}'.format(best_val_dice))
+    logging.info('Best Validation IoU Coeff: {}'.format(best_val_iou))
     logging.info(f'Best Epoch: {best_epoch + 1}')
     writer.close()
 
     # Testing
     net.load_state_dict(torch.load(dir_checkpoint + 'model.pth', map_location=device))
-    test_score = eval_net(net, test_loader, device)
-    if net.n_classes > 1:
-        logging.info('Test cross entropy: {}'.format(test_score))
-    else:
-        logging.info('Test Dice Coeff: {}'.format(test_score))
+    test_ce, test_iou = eval_net(net, test_loader, device, plot=True)
+    logging.info('Test cross entropy: {}'.format(test_ce))
+    logging.info('Test IoU: {}'.format(test_ce))
 
 
 def get_args():
