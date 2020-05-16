@@ -40,7 +40,6 @@ def train_net(dir_img,
     val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
     test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
 
-
     current_time = datetime.now().strftime('%b%d_%H-%M-%S')
     log_dir = os.path.join(dir_checkpoint, current_time + '_' + socket.gethostname() + f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
     writer = SummaryWriter(log_dir=log_dir)
@@ -143,7 +142,7 @@ def train_net(dir_img,
 
     # Testing
     net.load_state_dict(torch.load(dir_checkpoint + 'model.pth', map_location=device))
-    test_ce, test_iou = eval_net(net, test_loader, device, plot=True)
+    test_ce, test_iou = eval_net(net, test_loader, device, plot=False, dir_checkpoint=dir_checkpoint)
     logging.info('Test cross entropy: {}'.format(test_ce))
     logging.info('Test IoU: {}'.format(test_ce))
 

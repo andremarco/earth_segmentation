@@ -6,7 +6,7 @@ from iou_loss import iou_coeff
 from utils.data_vis import plot_img_and_mask
 
 
-def eval_net(net, loader, device, plot=False):
+def eval_net(net, loader, device, plot=False, dir_checkpoint=None):
     """Evaluation with the iou coefficient"""
     net.eval()
     mask_type = torch.float32 if net.n_classes == 1 else torch.long
@@ -30,6 +30,6 @@ def eval_net(net, loader, device, plot=False):
 
             if plot:
                 for i, c in enumerate(zip(imgs, mask_pred)):
-                    plot_img_and_mask(c[0], c[1])
+                    plot_img_and_mask(c[0], c[1], dir_checkpoint)
 
     return tot_ce / n_val, tot_iou / n_val
