@@ -34,9 +34,9 @@ def train_net(dir_img,
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val - n_test
     train, val, test = random_split(dataset, [n_train, n_val, n_test])
-    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, num_workers=0, pin_memory=True)
-    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, num_workers=0, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, num_workers=0, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, num_workers=8, pin_memory=True)
+    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
 
     writer = SummaryWriter(comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
     global_step = 0

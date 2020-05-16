@@ -21,10 +21,10 @@ class IoU(Function):
             else:
                 self.inter = torch.dot(jaccard_input.flatten(), jaccard_target.flatten())
                 self.union = torch.sum(jaccard_input) + torch.sum(jaccard_target) + eps
-                t = (self.inter.float() + eps) / (self.union.float() - self.inter.float())
+                t = (self.inter.float() + eps) / self.union.float()
                 loss[class_index] = t
 
-        return t
+        return torch.mean(loss)
 
 
 def iou_coeff(input, target):
