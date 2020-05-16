@@ -2,6 +2,8 @@ import argparse
 import logging
 import os
 import sys
+import socket
+from datetime import datetime
 
 import torch
 import torch.nn as nn
@@ -38,7 +40,10 @@ def train_net(dir_img,
     val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
     test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
 
-    writer = SummaryWriter(comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
+
+    current_time = datetime.now().strftime('%b%d_%H-%M-%S')
+    log_dir = os.path.join(dir_checkpoint, current_time + '_' + socket.gethostname() + f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
+    writer = SummaryWriter(log_dir=log_dir)
     global_step = 0
 
     logging.info(f'''Starting training:
