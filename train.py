@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 from eval import eval_net
 from unet import UNet
+from icnet import ICNet, ICNetLoss, IterationPolyLR
 
 from torch.utils.tensorboard import SummaryWriter
 from utils.dataset import BasicDataset
@@ -23,6 +24,7 @@ def train_net(dir_img,
               dir_checkpoint,
               net,
               device,
+              model_arch,
               epochs=5,
               batch_size=1,
               lr=0.001,
@@ -57,9 +59,14 @@ def train_net(dir_img,
         Images scaling:  {img_scale}
     ''')
 
-    optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min' if net.n_classes > 1 else 'max', patience=2)
-    criterion = nn.CrossEntropyLoss()
+    if model_arch == 'icnet':
+        optimizer = torch.optim.SGD(params=net.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)
+        scheduler = IterationPolyLR(optimizer, max_iters=epochs*len(train_loader), power=0.9)
+        criterion = ICNetLoss()
+    else:
+        optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min' if net.n_classes > 1 else 'max', patience=2)
+        criterion = nn.CrossEntropyLoss()
 
     # Training
     early_stopping = 10
@@ -99,11 +106,13 @@ def train_net(dir_img,
             writer.add_scalar('Loss/train', epoch_loss, epoch)
             for tag, value in net.named_parameters():
                 tag = tag.replace('.', '/')
+                if value.grad is None:
+                    continue
                 writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), epoch)
                 writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(), epoch)
 
         # Validation
-        val_ce, val_iou = eval_net(net, val_loader, device)
+        val_ce, val_iou = eval_net(net, model_arch, val_loader, device)
         scheduler.step(val_ce)
         writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], epoch)
 
@@ -142,7 +151,7 @@ def train_net(dir_img,
 
     # Testing
     net.load_state_dict(torch.load(dir_checkpoint + 'model.pth', map_location=device))
-    test_ce, test_iou = eval_net(net, test_loader, device, plot=False, dir_checkpoint=dir_checkpoint)
+    test_ce, test_iou = eval_net(net, model_arch, test_loader, device, plot=False, dir_checkpoint=dir_checkpoint)
     logging.info('Test cross entropy: {}'.format(test_ce))
     logging.info('Test IoU: {}'.format(test_ce))
 
@@ -150,6 +159,8 @@ def train_net(dir_img,
 def get_args():
     parser = argparse.ArgumentParser(description='Train the UNet on images and target masks',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-a", "--model_arch", help="Model architecture", type=str,
+                        default='unet')
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
                         default='./data/imgs/')
     parser.add_argument("-m", "--dir_mask", help="Masks directory", type=str,
@@ -160,7 +171,7 @@ def get_args():
                         help='Number of epochs', dest='epochs')
     parser.add_argument('-b', '--batch-size', metavar='B', type=int, nargs='?', default=1,
                         help='Batch size', dest='batchsize')
-    parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.1,
+    parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.01,
                         help='Learning rate', dest='lr')
     parser.add_argument('-f', '--load', dest='load', type=str, default=False,
                         help='Load model from a .pth file')
@@ -175,6 +186,7 @@ def get_args():
 
 
 if __name__ == '__main__':
+    models = "'icnet', 'unet'"
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     args = get_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -190,11 +202,21 @@ if __name__ == '__main__':
     #   - For 1 class and background, use n_classes=1
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
-    net = UNet(n_channels=3, n_classes=6, bilinear=True)
-    logging.info(f'Network:\n'
+    model_arch = args.model_arch
+    if model_arch == 'unet':
+        net = UNet(n_channels=3, n_classes=6, bilinear=True)
+        logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels (classes)\n'
                  f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
+    elif model_arch == 'icnet':
+        net = ICNet(n_channels=3, n_classes=6, pretrained_base=False)
+        logging.info(f'Network:\n'
+                    f'\t{net.n_channels} input channels\n'
+                    f'\t{net.n_classes} output channels (classes)')
+    else :
+        print(f'Model not implemented yet. Please choose one of the available models: {models}')
+        exit(0)
 
     if args.load:
         net.load_state_dict(
@@ -217,7 +239,8 @@ if __name__ == '__main__':
                   device=device,
                   img_scale=args.scale,
                   val_percent=args.val / 100,
-                  test_percent=args.test / 100)
+                  test_percent=args.test / 100,
+                  model_arch=model_arch)
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         logging.info('Saved interrupt')
