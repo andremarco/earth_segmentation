@@ -8,7 +8,7 @@ from utils.data_vis import plot_img_and_mask
 
 def eval_net(net, loader, device, plot=False, dir_checkpoint=None):
     """Evaluation with the iou coefficient"""
-    net.eval()
+    #net.eval()
     mask_type = torch.float32 if net.n_classes == 1 else torch.long
     n_val = len(loader)  # the number of batch
     tot_ce = 0
