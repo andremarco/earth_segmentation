@@ -31,7 +31,6 @@ class BasicDataset(Dataset):
         img_nd = np.array(pil_img)
 
         if len(img_nd.shape) == 2:
-            print("EXPAND")
             img_nd = np.expand_dims(img_nd, axis=2)
 
         # HWC to CHW
