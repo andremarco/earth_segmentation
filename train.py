@@ -154,7 +154,7 @@ def train_net(dir_img,
     net.load_state_dict(torch.load(dir_checkpoint + 'model.pth', map_location=device))
     test_ce, test_iou = eval_net(net, model_arch, test_loader, device, plot=False, dir_checkpoint=dir_checkpoint)
     logging.info('Test cross entropy: {}'.format(test_ce))
-    logging.info('Test IoU: {}'.format(test_ce))
+    logging.info('Test IoU: {}'.format(test_iou))
 
 
 def get_args():
