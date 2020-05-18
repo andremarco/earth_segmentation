@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .segbase import SegBaseModel
-from torchsummary import summary
 
 
 class ICNet(SegBaseModel):
