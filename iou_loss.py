@@ -10,6 +10,8 @@ class IoU(Function):
         classes = range(n_classes)
         loss = torch.zeros(n_classes, dtype=torch.float, device=input.device)
         eps = 0.0001
+        input = torch.sigmoid(input)
+        input = (input > 0.5).float()
         for class_index in classes:
             jaccard_target = (target == class_index).float()
             jaccard_input = input[class_index, ...]
@@ -19,9 +21,9 @@ class IoU(Function):
             if num_preds == 0:
                 loss[class_index] = 0
             else:
-                self.inter = torch.dot(jaccard_input.flatten(), jaccard_target.flatten())
-                self.union = torch.sum(jaccard_input) + torch.sum(jaccard_target) + eps
-                t = (self.inter.float() + eps) / self.union.float()
+                inter = torch.dot(jaccard_input.flatten(), jaccard_target.flatten())
+                union = torch.sum(jaccard_input) + torch.sum(jaccard_target) - inter + eps
+                t = (inter.float() + eps) / union.float()
                 loss[class_index] = t
 
         return torch.mean(loss)

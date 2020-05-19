@@ -162,9 +162,9 @@ def get_args():
     parser.add_argument("-a", "--model_arch", help="Model architecture", type=str,
                         default='unet')
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
-                        default='./data/imgs/')
+                        default='./data/imgs/prova_RGB/')
     parser.add_argument("-m", "--dir_mask", help="Masks directory", type=str,
-                        default='./data/masks/')
+                        default='./data/masks/prova_truth/')
     parser.add_argument("-c", "--dir_checkpoint", help="Checkpoint directory, where to save", type=str,
                         default='./checkpoints/')
     parser.add_argument('-e', '--epochs', metavar='E', type=int, default=5,
