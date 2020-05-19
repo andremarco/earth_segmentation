@@ -25,7 +25,7 @@ class IoU(Function):
                 union = torch.sum(jaccard_input) + torch.sum(jaccard_target) - inter + eps
                 t = (inter.float() + eps) / union.float()
                 loss[class_index] = t
-
+        print(loss)
         return torch.mean(loss)
 
 
