@@ -174,6 +174,10 @@ def get_args():
                         help='Learning rate', dest='lr')
     parser.add_argument('-f', '--load', dest='load', type=str, default=False,
                         help='Load model from a .pth file')
+    parser.add_argument('-ic', '--input_channels', dest='input_channels', type=int, default=3,
+                        help='Number of input channels')
+    parser.add_argument('-oc', '--output_channels', dest='output_channels', type=int, default=4,
+                        help='Number of output channels')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=0.5,
                         help='Downscaling factor of the images')
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
@@ -202,14 +206,16 @@ if __name__ == '__main__':
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
     model_arch = args.model_arch
+    n_channels_input = args.input_channels
+    n_channels_output = args.output_channels
     if model_arch == 'unet':
-        net = UNet(n_channels=3, n_classes=6, bilinear=True)
+        net = UNet(n_channels=n_channels_input, n_classes=n_channels_output, bilinear=True)
         logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels (classes)\n'
                  f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
     elif model_arch == 'icnet':
-        net = ICNet(n_channels=3, n_classes=6, pretrained_base=False)
+        net = ICNet(n_channels=n_channels_input, n_classes=n_channels_output, pretrained_base=False)
         logging.info(f'Network:\n'
                     f'\t{net.n_channels} input channels\n'
                     f'\t{net.n_classes} output channels (classes)')
