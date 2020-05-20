@@ -1,5 +1,6 @@
 import torch
 from torch.autograd import Function
+import logging
 
 
 class IoU(Function):
@@ -11,10 +12,12 @@ class IoU(Function):
         loss = torch.zeros(n_classes, dtype=torch.float, device=input.device)
         eps = 0.0001
         input = torch.sigmoid(input)
-        input = (input > 0.5).float()
+        max_index = torch.max(input, 0).indices
+        #input = (input > 0.5).float()
         for class_index in classes:
             jaccard_target = (target == class_index).float()
-            jaccard_input = input[class_index, ...]
+            #jaccard_input = input[class_index, ...]
+            jaccard_input = (max_index == class_index).float()
 
             num_preds = jaccard_target.long().sum()
 
@@ -25,7 +28,7 @@ class IoU(Function):
                 union = torch.sum(jaccard_input) + torch.sum(jaccard_target) - inter + eps
                 t = (inter.float() + eps) / union.float()
                 loss[class_index] = t
-        print(loss)
+        logging.info(loss)
         return torch.mean(loss)
 
 
