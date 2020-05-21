@@ -224,9 +224,7 @@ if __name__ == '__main__':
         exit(0)
 
     if args.load:
-        net.load_state_dict(
-            torch.load(args.load, map_location=device)
-        )
+        net.load_state_dict(torch.load(args.load, map_location=device))
         logging.info(f'Model loaded from {args.load}')
 
     net.to(device=device)
