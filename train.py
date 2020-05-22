@@ -219,7 +219,7 @@ if __name__ == '__main__':
         logging.info(f'Network:\n'
                     f'\t{net.n_channels} input channels\n'
                     f'\t{net.n_classes} output channels (classes)')
-    else :
+    else:
         print(f'Model not implemented yet. Please choose one of the available models: {models}')
         exit(0)
 
