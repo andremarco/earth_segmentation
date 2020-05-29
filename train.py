@@ -120,7 +120,7 @@ def train_net(dir_img,
         writer.add_scalar('Loss/test', val_ce, epoch)
         writer.add_scalar('IoU/test', val_iou, epoch)
 
-        writer.add_images('images', imgs, epoch)
+        # writer.add_images('images', imgs, epoch)
 
         if save_cp:
             try:
