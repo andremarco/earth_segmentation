@@ -38,9 +38,9 @@ def train_net(dir_img,
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val - n_test
     train, val, test = random_split(dataset, [n_train, n_val, n_test])
-    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, num_workers=8, pin_memory=True)
-    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, pin_memory=True)
+    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, pin_memory=True, drop_last=True)
 
     current_time = datetime.now().strftime('%b%d_%H-%M-%S')
     log_dir = os.path.join(dir_checkpoint, current_time + '_' + socket.gethostname() + f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
@@ -163,9 +163,9 @@ def get_args():
     parser.add_argument("-p", "--pretrained", help="Set True if you want to initialize the model with pretrained prameters", type=str,
                         default=False)
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
-                        default='./data/imgs/prova_RGB/')
+                        default='./data/rgb/')
     parser.add_argument("-m", "--dir_mask", help="Masks directory", type=str,
-                        default='./data/masks/prova_truth/')
+                        default='./data/mask/')
     parser.add_argument("-c", "--dir_checkpoint", help="Checkpoint directory, where to save", type=str,
                         default='./checkpoints/')
     parser.add_argument('-e', '--epochs', metavar='E', type=int, default=5,
