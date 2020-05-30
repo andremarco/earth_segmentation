@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .backbones.resnetv1b import resnet50_v1s, resnet101_v1s, resnet152_v1s
+from .backbones.resnetv1b import resnet50_v1s
 
 
 class SegBaseModel(nn.Module):
@@ -11,16 +11,12 @@ class SegBaseModel(nn.Module):
         'resnet101' or 'resnet152').
     """
 
-    def __init__(self, nclass, backbone='resnet50', pretrained_base=True, **kwargs):
+    def __init__(self, nclass, backbone='resnet50', input_size=3, pretrained_base=True, **kwargs):
         super(SegBaseModel, self).__init__()
         dilated = True
         self.nclass = nclass
         if backbone == 'resnet50':
-            self.pretrained = resnet50_v1s(pretrained=pretrained_base, dilated=dilated, **kwargs)
-        elif backbone == 'resnet101':
-            self.pretrained = resnet101_v1s(pretrained=pretrained_base, dilated=dilated, **kwargs)
-        elif backbone == 'resnet152':
-            self.pretrained = resnet152_v1s(pretrained=pretrained_base, dilated=dilated, **kwargs)
+            self.pretrained = resnet50_v1s(input_size=input_size, pretrained=pretrained_base, dilated=dilated, **kwargs)
         else:
             raise RuntimeError('unknown backbone: {}'.format(backbone))
 

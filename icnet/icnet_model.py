@@ -9,7 +9,7 @@ class ICNet(SegBaseModel):
     """Image Cascade Network"""
     
     def __init__(self, n_channels=3, n_classes=19, backbone='resnet50', pretrained_base=True):
-        super(ICNet, self).__init__(n_classes,backbone, pretrained_base=pretrained_base)
+        super(ICNet, self).__init__(n_classes,backbone, input_size=n_channels, pretrained_base=pretrained_base)
         self.n_channels = n_channels
         self.n_classes = n_classes
 

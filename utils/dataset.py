@@ -50,6 +50,7 @@ class BasicDataset(Dataset):
         mask_file = glob(self.masks_dir + idx.rsplit('_',1)[0] + '_CLS.*')
         img_file = glob(self.imgs_dir + idx + '.*')
         
+        
         assert len(mask_file) == 1, \
             f'Either no mask or multiple masks found for the ID {idx}: {mask_file}'
         assert len(img_file) == 1, \
