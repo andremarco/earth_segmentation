@@ -161,7 +161,7 @@ def get_args():
     parser.add_argument("-a", "--model_arch", help="Model architecture", type=str,
                         default='unet')
     parser.add_argument("-p", "--pretrained", help="Set True if you want to initialize the model with pretrained prameters", type=str,
-                        default='False')
+                        default=False)
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
                         default='./data/imgs/prova_RGB/')
     parser.add_argument("-m", "--dir_mask", help="Masks directory", type=str,
