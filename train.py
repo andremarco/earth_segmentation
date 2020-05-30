@@ -160,6 +160,8 @@ def get_args():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-a", "--model_arch", help="Model architecture", type=str,
                         default='unet')
+    parser.add_argument("-p", "--pretrained", help="Set True if you want to initialize the model with pretrained prameters", type=str,
+                        default='False')
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
                         default='./data/imgs/prova_RGB/')
     parser.add_argument("-m", "--dir_mask", help="Masks directory", type=str,
@@ -206,6 +208,9 @@ if __name__ == '__main__':
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
     model_arch = args.model_arch
+    if args.pretrained != False:
+        args.pretrained = True
+        print('Initializing pretrained model...')
     n_channels_input = args.input_channels
     n_channels_output = args.output_channels
     if model_arch == 'unet':
@@ -215,7 +220,7 @@ if __name__ == '__main__':
                  f'\t{net.n_classes} output channels (classes)\n'
                  f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
     elif model_arch == 'icnet':
-        net = ICNet(n_channels=n_channels_input, n_classes=n_channels_output, pretrained_base=False)
+        net = ICNet(n_channels=n_channels_input, n_classes=n_channels_output, pretrained_base=args.pretrained)
         logging.info(f'Network:\n'
                     f'\t{net.n_channels} input channels\n'
                     f'\t{net.n_classes} output channels (classes)')
