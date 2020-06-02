@@ -22,8 +22,8 @@ class IoU(Function):
             range_v = torch.max(current_matrix) - min_v
 
             # Trasliamo tutti i valori in positivi
-            current_matrix = current_matrix + min_v
-            min_v = 0
+            # current_matrix = current_matrix + min_v
+            # min_v = 0
 
             # Normalizziamo
             normalised = (current_matrix - min_v) / range_v
