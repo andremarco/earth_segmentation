@@ -13,7 +13,7 @@ class IoU(Function):
         eps = 0.0001
 
         # Perform the sigmoid
-        # input = torch.sigmoid(input)
+        input = torch.sigmoid(input)
 
         # Normalization for each channel
         for class_index in classes:
@@ -22,9 +22,9 @@ class IoU(Function):
             range_v = abs(torch.max(current_matrix) - min_v)
 
             # Trasliamo tutti i valori in positivi
-            if min_v < 0:
-                current_matrix = current_matrix + abs(min_v)
-                min_v = 0
+            # if min_v < 0:
+                # current_matrix = current_matrix + abs(min_v)
+                # min_v = 0
 
             # Normalizziamo
             normalised = (current_matrix - min_v) / range_v
