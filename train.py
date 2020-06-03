@@ -38,8 +38,8 @@ def train_net(dir_img,
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val - n_test
     train, val, test = random_split(dataset, [n_train, n_val, n_test])
-    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, pin_memory=True)
-    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, pin_memory=True, num_workers=0)
+    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, pin_memory=True, drop_last=True, num_workers=0)
     test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, pin_memory=True, drop_last=True)
 
     current_time = datetime.now().strftime('%b%d_%H-%M-%S')
@@ -174,7 +174,7 @@ def get_args():
                         help='Batch size', dest='batchsize')
     parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.01,
                         help='Learning rate', dest='lr')
-    parser.add_argument('-f', '--load', dest='load', type=str, default=False,
+    parser.add_argument('-f', '--load', dest='load', type=str, default="model.pth",
                         help='Load model from a .pth file')
     parser.add_argument('-ic', '--input_channels', dest='input_channels', type=int, default=3,
                         help='Number of input channels')

@@ -13,17 +13,18 @@ class IoU(Function):
         eps = 0.0001
 
         # Perform the sigmoid
-        input = torch.sigmoid(input)
+        # input = torch.sigmoid(input)
 
         # Normalization for each channel
         for class_index in classes:
             current_matrix = input[class_index]
             min_v = torch.min(current_matrix)
-            range_v = torch.max(current_matrix) - min_v
+            range_v = abs(torch.max(current_matrix) - min_v)
 
             # Trasliamo tutti i valori in positivi
-            # current_matrix = current_matrix + min_v
-            # min_v = 0
+            if min_v < 0:
+                current_matrix = current_matrix + abs(min_v)
+                min_v = 0
 
             # Normalizziamo
             normalised = (current_matrix - min_v) / range_v
@@ -32,6 +33,7 @@ class IoU(Function):
 
         # Selezioniamo il massimo in ciascuna immagine
         max_index = torch.max(input, 0).indices
+        # max_index = torch.max(input[1:, ...], 0).indices
 
         for class_index in classes:
             jaccard_target = (target == class_index).float()
