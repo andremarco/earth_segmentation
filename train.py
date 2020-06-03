@@ -38,9 +38,9 @@ def train_net(dir_img,
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val - n_test
     train, val, test = random_split(dataset, [n_train, n_val, n_test])
-    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, pin_memory=True, num_workers=0)
-    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, pin_memory=True, drop_last=True, num_workers=0)
-    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train, batch_size=min(n_train, batch_size), shuffle=True, pin_memory=True, num_workers=4)
+    val_loader = DataLoader(val, batch_size=min(n_val, batch_size), shuffle=False, pin_memory=True, drop_last=True, num_workers=4)
+    test_loader = DataLoader(test, batch_size=min(n_test, batch_size), shuffle=False, pin_memory=True, drop_last=True, num_workers=4)
 
     current_time = datetime.now().strftime('%b%d_%H-%M-%S')
     log_dir = os.path.join(dir_checkpoint, current_time + '_' + socket.gethostname() + f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
