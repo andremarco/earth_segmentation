@@ -2,16 +2,14 @@ import sys; print('Python %s on %s' % (sys.version, sys.platform))
 sys.path.extend(['/Users/andreabp/PycharmProjects/earth_segmentation'])
 
 import argparse
-
 import matplotlib.pyplot as plt
 import torch
-from PIL import Image
+import tifffile as tiff
 
+from PIL import Image
 from icnet import ICNet
 from unet import UNet
 from utils.dataset import BasicDataset
-
-
 
 
 def plot_img_and_mask(img, mask, dir_checkpoint):
@@ -45,15 +43,16 @@ def plot_imgs_pred():
     args = get_plot_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    img = Image.open(args.dir_img)
+    # img = Image.open(args.dir_img)
+    img = tiff.imread(args.dir_img)
     img = BasicDataset.preprocess(img, scale=args.scale)
     img = torch.from_numpy(img).type(torch.FloatTensor)
 
     if args.model_arch == 'unet':
-        net = UNet(n_channels=3, n_classes=4, bilinear=True)
+        net = UNet(n_channels=4, n_classes=4, bilinear=True)
 
     elif args.model_arch == 'icnet':
-        net = ICNet(n_channels=3, n_classes=4, pretrained_base=False)
+        net = ICNet(n_channels=4, n_classes=4, pretrained_base=False)
 
     net.load_state_dict(torch.load(args.checkpoint_net, map_location=device))
     net.to(device=device)
@@ -93,12 +92,12 @@ def get_plot_args():
     parser.add_argument("-a", "--model_arch", help="Model architecture", type=str,
                         default='unet')
     parser.add_argument("-i", "--dir_img", help="Images directory", type=str,
-                        default='./data/imgs/prova_RGB/')
+                        default='./data/imgs/img_prova.tif')
     parser.add_argument("-o", "--dir_output", help="Output directory", type=str,
                         default='./data/plot/', dest="dir_output")
     parser.add_argument("-c", "--checkpoint_net", help="Checkpoint directory, where to load", type=str,
-                        default='./checkpoints/')
-    parser.add_argument('-k', '--input_channels', dest='input_channels', type=int, default=3,
+                        default='model.pth')
+    parser.add_argument('-k', '--input_channels', dest='input_channels', type=int, default=4,
                         help='Number of input channels')
     parser.add_argument('-w', '--output_channels', dest='output_channels', type=int, default=4,
                         help='Number of output channels')
